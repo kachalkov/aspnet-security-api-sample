@@ -135,14 +135,14 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
 
                if (!string.IsNullOrEmpty(alertFilter.FilteredQuery))
                 {
-                    queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts?$filter={HttpUtility.UrlEncode(alertFilter.FilteredQuery)}%26$top={alertFilter.Top}&&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/testSecurity/security/alerts?");
+                    queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts?$filter={HttpUtility.UrlEncode(alertFilter.FilteredQuery)}%26$top={alertFilter.Top}&&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/beta/security/alerts?");
 
                     queryBuilder.Append($"$filter={HttpUtility.UrlEncode(alertFilter.FilteredQuery)}&");
                     queryBuilder.Append($"$top={alertFilter.Top}</a>'");
                 }
                 else
                 {
-                    queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts?$top={alertFilter.Top}&&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/testSecurity/security/alerts?");
+                    queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts?$top={alertFilter.Top}&&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/beta/security/alerts?");
                     queryBuilder.Append($"$top={alertFilter.Top}</a>'");
                 }
                 queryBuilder.Append("<br />");
@@ -306,7 +306,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 queryBuilder.Append($"SDK query: 'await graphClient.Security.Alerts[\"{id}\"].Request().GetAsync();'");
                 queryBuilder.Append("<br />");
 
-                queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts/{id}&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/testSecurity/security/alerts/{id}/</a>'");
+                queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts/{id}&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/beta/security/alerts/{id}/</a>'");
                 queryBuilder.Append("<br />");
 
 

@@ -19,13 +19,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
 {
     public class GraphService
     {
-        /// <summary>
-        /// Change IsgProdBaseUrl = "https://graph.microsoft.com/beta" after onboarding to the Beta endpoint in Graph
-        /// </summary>
-        public readonly string IsgProdBaseUrl = "https://graph.microsoft.com/testSecurity";
-        public readonly string GraphBetaBaseUrl = "https://graph.microsoft.com/beta";
-        public readonly string IsgDevBaseUrl = "https://graph.microsoft.com/testSecurityDev";
-
+        public readonly string GraphBetaBaseUrl = "https://graph.microsoft.com/beta";     
         public GraphServiceClient graphClient = null;
 
         /// <summary>

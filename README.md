@@ -137,7 +137,7 @@ You can use the ngrok web interface (http://127.0.0.1:4040) to inspect the HTTP 
 
 1. Copy the **URL** port number from the **Properties** window. If the **Properties** window isn't dsplayed, choose **View > Properties Window**. 
 
-	![The URL port number in the Properties window](readme-images/ngrok.jpg)
+	![The URL port number in the Properties window](readme-images/ngrok.JPG)
 
 2. [Download ngrok](https://ngrok.com/download) for Windows.  
 
@@ -147,11 +147,11 @@ You can use the ngrok web interface (http://127.0.0.1:4040) to inspect the HTTP 
 
    `ngrok http {port-number} -host-header=localhost:{port-number}`
 
-	![Example command to run in the ngrok console](readme-images/ngrok1.png)
+	![Example command to run in the ngrok console](readme-images/ngrok1.PNG)
 
 5. Copy the HTTPS URL displayed in the console. You'll use this to configure your notification URL in the sample.
 
-	![The forwarding HTTPS URL in the ngrok console](readme-images/ngrok2.png)
+	![The forwarding HTTPS URL in the ngrok console](readme-images/ngrok2.PNG)
 
    >Keep the console open while testing. If you close it, the tunnel will also be closed, and you'll need to generate a new URL and update the sample.
 

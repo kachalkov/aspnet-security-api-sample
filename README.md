@@ -101,6 +101,8 @@ This section describes how the Tenant Administrator can authorize specific users
 
 6. Select the **Limited Administrator** radio button and select the check box next to **Security administrator** role
 
+     ![Role consent dialog](readme-images/SecurityRole.png)
+
 7. Click the **Save** button at the top of the page
 
 Repeat this action for each user in the organization that is authorized to use applications that call the Microsoft Graph security API. Currently, this permission cannot be granted to security groups.
@@ -177,7 +179,7 @@ See [Hosting without a tunnel](https://github.com/microsoftgraph/nodejs-webhooks
 
 6. Go to the original webpage and update an alert matching on the subscription filtering criteria you defined. When the alert is updated, the notification page will recieve and display the notification details, looking like this: 
 
-    ![Notification Listener page](readme-images/NotificationPage.jpg)
+    ![Notification Listener page](readme-images/NotificationPage.JPG)
 
 7. Next steps: Check out the [Microsoft Graph Snippets Sample for ASP.NET 4.6](https://github.com/microsoftgraph/aspnet-snippets-sample) to see additional examples of common Microsoft Graph operations.
 

@@ -221,6 +221,11 @@ namespace MicrosoftGraph_Security_API_Sample.Models
                 throw new ArgumentNullException(nameof(alert));
             }
 
+            if (updateAlertModel.UpdateStatus != "NewAlert" || updateAlertModel.UpdateStatus != "InProgress" || updateAlertModel.UpdateStatus != "Unknown")
+            {
+                updateAlertModel.UpdateStatus = "Resolved";
+            }
+
             if (!Enum.TryParse<AlertStatus>(updateAlertModel.UpdateStatus, true, out var status))
             {
                 throw new ArgumentOutOfRangeException(nameof(alert.Status));
@@ -317,7 +322,12 @@ namespace MicrosoftGraph_Security_API_Sample.Models
                 {
                     filters.Upn = filters.Upn.ToLower();
                     filteredQuery += (filteredQuery.Length == 0 ? $"userStates/any(a:a/userPrincipalName eq '{filters.Upn}')" : $" and userStates/any(a:a/userPrincipalName eq '{filters.Upn}')");
-                }      
+                }
+
+                if (!filters.Top.HasValue)
+                {
+                    filters.Top = 1;
+                }
 
                 filters.FilteredQuery = filteredQuery;
                 return await graphClient.Security.Alerts.Request().Filter(filteredQuery).Top(filters.Top.Value).GetAsync();

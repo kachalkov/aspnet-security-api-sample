@@ -13,6 +13,12 @@ namespace MicrosoftGraph_Security_API_Sample.Models
 
         public string Metadata { get; set; }
 
+        public string Comments { get; set; }
+
+        public string Status { get; set; }
+      
+        public string Feedback { get; set; }
+
         public GraphUserModel User { get; set; }
 
         public AlertDeviceModel Device { get; set; }

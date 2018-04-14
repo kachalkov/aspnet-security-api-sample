@@ -22,9 +22,6 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
     {
         GraphService graphService = new GraphService();
 
-        private string message = "";
-        private string queryDetails = "";
-
         private AlertFilter AlertFilters
         {
             get => Session["AlertFilters"] as AlertFilter;
@@ -314,7 +311,10 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 {
                     Id = alert.Id,
                     Metadata = JsonConvert.SerializeObject(alert, Formatting.Indented),
-                    Query = queryBuilder.ToString()
+                    Query = queryBuilder.ToString(),
+                    Comments = alert.Comments,
+                    Status = alert.Status.ToString(),
+                    Feedback = alert.Feedback.ToString()
                 };
 
                 var principalName = alert.UserStates?.FirstOrDefault()?.UserPrincipalName;

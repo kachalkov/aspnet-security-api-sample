@@ -72,7 +72,7 @@
 
             <hr />
 
-            @Html.Partial("_UpdateAlertPartialView", new UpdateAlertModel { AlertId = currentAlert?.Id })
+            @Html.Partial("_UpdateAlertPartialView", new UpdateAlertModel { AlertId = currentAlert?.Id, Comments = currentAlert?.Comments, Feedback = currentAlert?.Feedback, UpdateStatus = currentAlert?.Status})
 
 
             <hr />

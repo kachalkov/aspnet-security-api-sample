@@ -11,5 +11,6 @@ namespace MicrosoftGraph_Security_API_Sample.Models
         public string ClientState { get; set; }
         public string NotificationUrl { get; set; }
         public DateTimeOffset? ExpirationDateTime { get; set; }
+        public string Error { get; set; }
     }
 }

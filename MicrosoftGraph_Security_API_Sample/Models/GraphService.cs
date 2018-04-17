@@ -19,7 +19,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
 {
     public class GraphService
     {
-        public readonly string GraphBetaBaseUrl = "https://graph.microsoft.com/beta";     
+        public readonly string GraphBetaBaseUrl = "https://graph.microsoft.com/beta";
         public GraphServiceClient graphClient = null;
 
         /// <summary>
@@ -41,10 +41,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
         /// <returns>Email address of the signed in user</returns>
         public async Task<string> GetMyEmailAddress()
         {
-            var targetBaseUrl = graphClient.BaseUrl;
-            graphClient.BaseUrl = this.GraphBetaBaseUrl;
             User me = await graphClient.Me.Request().Select("mail,userPrincipalName").GetAsync();
-            graphClient.BaseUrl = targetBaseUrl;
             return me.Mail ?? me.UserPrincipalName;
         }
 
@@ -58,10 +55,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
         /// <returns>GraphUserModel</returns>
         public async Task<GraphUserModel> GetUserDetails(string principalName, bool populatePicture = false, bool populateManager = false, bool populateDevices = false)
         {
-            var graphUrl = graphClient.BaseUrl;
-            graphClient.BaseUrl = this.GraphBetaBaseUrl;
             GraphUserModel userModel = null;
-
             try
             {
                 //var user = await graphClient.Users[principalName].Request().GetAsync();
@@ -90,8 +84,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
                     if (picture != null)
                     {
                         MemoryStream picture1 = (MemoryStream)picture;
-                           string pic = "data:image/png;base64," + Convert.ToBase64String(picture1.ToArray(), 0, picture1.ToArray().Length);
-                        
+                        string pic = "data:image/png;base64," + Convert.ToBase64String(picture1.ToArray(), 0, picture1.ToArray().Length);
                         userModel.Picture = pic;
                     }
                 }
@@ -145,9 +138,6 @@ namespace MicrosoftGraph_Security_API_Sample.Models
                 }
             }
             catch { }
-
-
-            graphClient.BaseUrl = graphUrl;
 
             return userModel;
         }
@@ -281,14 +271,14 @@ namespace MicrosoftGraph_Security_API_Sample.Models
 
             if (filters.Category == null && filters.Provider == null && filters.Status == null && filters.Severity == null)
             {
-                if(filters.Top != null)
+                if (filters.Top != null)
                 {
                     return await graphClient.Security.Alerts.Request().Top(filters.Top.Value).GetAsync();
                 }
                 else
                 {
                     return await graphClient.Security.Alerts.Request().Top(1).GetAsync();
-                }            
+                }
             }
             else
             {
@@ -330,7 +320,15 @@ namespace MicrosoftGraph_Security_API_Sample.Models
                 }
 
                 filters.FilteredQuery = filteredQuery;
-                return await graphClient.Security.Alerts.Request().Filter(filteredQuery).Top(filters.Top.Value).GetAsync();
+                try
+                {
+                    return await graphClient.Security.Alerts.Request().Filter(filteredQuery).Top(filters.Top.Value).GetAsync();
+
+                }
+                catch (Exception e)
+                {
+                    return null;
+                }
             }
 
 
@@ -351,48 +349,42 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             var randno = Rand.Next(1, 100).ToString();
             var clientState = "IsgSdkSubscription" + randno;
 
-            if (filters.SubscriptionCategory == null && filters.SubscriptionProvider == null && filters.SubscriptionSeverity == null && !string.IsNullOrEmpty(filters.SubscriptionHostFqdn) && !string.IsNullOrEmpty(filters.SubscriptionUpn))
+
+            if (!string.IsNullOrEmpty(filters.SubscriptionCategory) && !filters.SubscriptionCategory.Equals("All", StringComparison.InvariantCultureIgnoreCase))
             {
-                return null;
+                filteredQuery += (filteredQuery.Length == 0 ? $"Category eq '{filters.SubscriptionCategory}'" : $" and Category eq '{filters.SubscriptionCategory}'");
             }
-            else
+
+            if (!string.IsNullOrEmpty(filters.SubscriptionProvider) && !filters.SubscriptionProvider.Equals("All", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (!string.IsNullOrEmpty(filters.SubscriptionCategory) && !filters.SubscriptionCategory.Equals("All", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    filteredQuery += (filteredQuery.Length == 0 ? $"Category eq '{filters.SubscriptionCategory}'" : $" and Category eq '{filters.SubscriptionCategory}'");
-                }
-
-                if (!string.IsNullOrEmpty(filters.SubscriptionProvider) && !filters.SubscriptionProvider.Equals("All", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    filteredQuery += (filteredQuery.Length == 0 ? $"vendorInformation/provider eq '{filters.SubscriptionProvider}'" : $" and vendorInformation/provider eq '{filters.SubscriptionProvider}'");
-                }
-                if (!string.IsNullOrEmpty(filters.SubscriptionSeverity) && !filters.SubscriptionSeverity.Equals("All", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    filteredQuery += (filteredQuery.Length == 0 ? $"Severity eq '{filters.SubscriptionSeverity}'" : $" and Severity eq '{filters.SubscriptionSeverity}'");
-                }
-                if (!string.IsNullOrEmpty(filters.SubscriptionHostFqdn))
-                {
-                    filteredQuery += (filteredQuery.Length == 0 ? $"hostStates/any(a:a/fqdn eq '{filters.SubscriptionHostFqdn}')" : $" and hostStates/any(a:a/fqdn eq '{filters.SubscriptionHostFqdn}')");
-                }
-
-                if (!string.IsNullOrEmpty(filters.SubscriptionUpn))
-                {
-                    filteredQuery += (filteredQuery.Length == 0 ? $"userStates/any(a:a/userPrincipalName eq '{filters.SubscriptionUpn}')" : $" and userStates/any(a:a/userPrincipalName eq '{filters.SubscriptionUpn}')");
-                }
-
-                resource += $"?$filter={filteredQuery}";
-
-                Subscription subscription = new Subscription()
-                {
-                    ChangeType = changeType,
-                    NotificationUrl = ConfigurationManager.AppSettings["ida:NotificationUrl"],
-                    Resource = resource,
-                    ExpirationDateTime = expirationDate,
-                    ClientState = clientState
-                };
-
-                return await graphClient.Subscriptions.Request().AddAsync(subscription);
+                filteredQuery += (filteredQuery.Length == 0 ? $"vendorInformation/provider eq '{filters.SubscriptionProvider}'" : $" and vendorInformation/provider eq '{filters.SubscriptionProvider}'");
             }
+            if (!string.IsNullOrEmpty(filters.SubscriptionSeverity) && !filters.SubscriptionSeverity.Equals("All", StringComparison.InvariantCultureIgnoreCase))
+            {
+                filteredQuery += (filteredQuery.Length == 0 ? $"Severity eq '{filters.SubscriptionSeverity}'" : $" and Severity eq '{filters.SubscriptionSeverity}'");
+            }
+            if (!string.IsNullOrEmpty(filters.SubscriptionHostFqdn))
+            {
+                filteredQuery += (filteredQuery.Length == 0 ? $"hostStates/any(a:a/fqdn eq '{filters.SubscriptionHostFqdn}')" : $" and hostStates/any(a:a/fqdn eq '{filters.SubscriptionHostFqdn}')");
+            }
+
+            if (!string.IsNullOrEmpty(filters.SubscriptionUpn))
+            {
+                filteredQuery += (filteredQuery.Length == 0 ? $"userStates/any(a:a/userPrincipalName eq '{filters.SubscriptionUpn}')" : $" and userStates/any(a:a/userPrincipalName eq '{filters.SubscriptionUpn}')");
+            }
+
+            resource += $"?$filter={filteredQuery}";
+
+            Subscription subscription = new Subscription()
+            {
+                ChangeType = changeType,
+                NotificationUrl = ConfigurationManager.AppSettings["ida:NotificationUrl"],
+                Resource = resource,
+                ExpirationDateTime = expirationDate,
+                ClientState = clientState
+            };
+
+            return await graphClient.Subscriptions.Request().AddAsync(subscription);
         }
     }
 }

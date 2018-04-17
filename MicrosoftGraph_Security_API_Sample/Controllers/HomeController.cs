@@ -363,38 +363,45 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
             SubscriptionFilters = subscriptionFilters;
             try
             {
-                var subscription = await graphService.Subscribe(subscriptionFilters);
-                var queryBuilder = new StringBuilder();
-
-                queryBuilder.Append($"SDK query: 'graphClient.Subscriptions.Request().AddAsync(subscription)'");
-                queryBuilder.Append("<br />");
-
-                queryBuilder.Append($"REST query: POST '<a>https://graph.microsoft.com/beta/subscriptions</a>'");
-                queryBuilder.Append("<br />");
-               
-                //var updateAlertResultModel = new UpdateAlertResultModel { Query = queryBuilder.ToString() };
-
-
-                if (subscription!= null)
+                if (subscriptionFilters.SubscriptionCategory == "All" && subscriptionFilters.SubscriptionProvider == "All" && subscriptionFilters.SubscriptionSeverity == "All" && string.IsNullOrEmpty(subscriptionFilters.SubscriptionHostFqdn) && string.IsNullOrEmpty(subscriptionFilters.SubscriptionUpn))
                 {
                     var subscriptionResultModel = new SubscriptionResultModel()
                     {
-                        Id = subscription.Id,
-                        Resource = subscription.Resource,
-                        NotificationUrl = subscription.NotificationUrl,
-                        ExpirationDateTime = subscription.ExpirationDateTime,
-                        ChangeType = subscription.ChangeType,
-                        ClientState = subscription.ClientState
+                        Error = "Please select at least one property/criterion for subscribing to alert notifications"
                     };
                     ViewBag.GetSubscriptionResults = subscriptionResultModel;
                 }
                 else
                 {
-                    ViewBag.GetSubscriptionResults = null;
+                    var subscription = await graphService.Subscribe(subscriptionFilters);
+                    var queryBuilder = new StringBuilder();
 
-                }
+                    queryBuilder.Append($"SDK query: 'graphClient.Subscriptions.Request().AddAsync(subscription)'");
+                    queryBuilder.Append("<br />");
+
+                    queryBuilder.Append($"REST query: POST '<a>https://graph.microsoft.com/beta/subscriptions</a>'");
+                    queryBuilder.Append("<br />");
+
+                    if (subscription != null)
+                    {
+                        var subscriptionResultModel = new SubscriptionResultModel()
+                        {
+                            Id = subscription.Id,
+                            Resource = subscription.Resource,
+                            NotificationUrl = subscription.NotificationUrl,
+                            ExpirationDateTime = subscription.ExpirationDateTime,
+                            ChangeType = subscription.ChangeType,
+                            ClientState = subscription.ClientState
+                        };
+                        ViewBag.GetSubscriptionResults = subscriptionResultModel;
+                    }
+                    else
+                    {
+                        ViewBag.GetSubscriptionResults = null;
+
+                    }
+                }   
                 Session["GetAlertResults"] = null;
-
                 return View("Graph");
             }
             catch (ServiceException se)
@@ -405,6 +412,10 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 }
 
                 return RedirectToAction("Index", "Error", new { message = Resource.Error_Message + Request.RawUrl + ": " + se.Error.Message });
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Error", new { message = Resource.Error_Message + Request.RawUrl + ": " + ex.Message });
             }
         }
 

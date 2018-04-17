@@ -315,6 +315,12 @@
                         <div class="col-md-12">
                             @if (subscriptionResults != null)
                             {
+                                if (!string.IsNullOrEmpty(subscriptionResults.Error))
+                                {
+                                    @subscriptionResults.Error
+                                }
+                                else
+                                {
                                 <span>Subscription created: </span>
 
                                 <table class="table table-striped subscription-details" cellpadding="10">
@@ -330,12 +336,13 @@
                                         <tr><td>Expiration Datetime</td><td>@subscriptionResults.ExpirationDateTime</td></tr>
                                     </tbody>
                                 </table>
+                                    }
 
-                            }
-                            else
-                            {
+                                }
+                                else
+                                {
                                 <span>No subscription created</span>
-                            }
+                                }
 
                         </div>
                     </div>

@@ -211,11 +211,6 @@ namespace MicrosoftGraph_Security_API_Sample.Models
                 throw new ArgumentNullException(nameof(alert));
             }
 
-            if (updateAlertModel.UpdateStatus != "NewAlert" || updateAlertModel.UpdateStatus != "InProgress" || updateAlertModel.UpdateStatus != "Unknown")
-            {
-                updateAlertModel.UpdateStatus = "Resolved";
-            }
-
             if (!Enum.TryParse<AlertStatus>(updateAlertModel.UpdateStatus, true, out var status))
             {
                 throw new ArgumentOutOfRangeException(nameof(alert.Status));

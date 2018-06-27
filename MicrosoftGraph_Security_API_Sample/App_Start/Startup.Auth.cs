@@ -10,6 +10,7 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using System.Configuration;
+using System.Web.Mvc;
 using System.Threading.Tasks;
 using MicrosoftGraph_Security_API_Sample.TokenStorage;
 using System.IdentityModel.Tokens;
@@ -20,7 +21,7 @@ using System.Collections.Generic;
 
 namespace MicrosoftGraph_Security_API_Sample
 {
-    public partial class Startup
+    public partial class Startup 
     {
 
         // The appId is used by the application to uniquely identify itself to Azure AD.
@@ -31,7 +32,7 @@ namespace MicrosoftGraph_Security_API_Sample
         private static string appSecret = ConfigurationManager.AppSettings["ida:AppSecret"];
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
         private static string graphScopes = ConfigurationManager.AppSettings["ida:GraphScopes"];
-        HomeController homeController = new HomeController();
+        public static List<string> UserScopesList = null;
 
         public async void ConfigureAuth(IAppBuilder app)
         {
@@ -71,8 +72,8 @@ namespace MicrosoftGraph_Security_API_Sample
                                 null);
                             string[] scopes = graphScopes.Split(new char[] { ' ' });
 
-                            AuthenticationResult result = await cca.AcquireTokenByAuthorizationCodeAsync(code, scopes);
-                            ConfigurationManager.AppSettings["ida:UserScopes"] = string.Join(" ", result.Scopes);            
+                            AuthenticationResult result = await cca.AcquireTokenByAuthorizationCodeAsync(code, scopes); 
+                            UserScopesList = new List<string>(result.Scopes);
                         },
              
                     }

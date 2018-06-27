@@ -197,7 +197,7 @@
     <Compile Include="Models\AlertModel.cs" />
     <Compile Include="Models\AlertFilters.cs" />
     <Compile Include="Models\AlertResultItemModel.cs" />
-    <Compile Include="Models\SubscriptionResultsModel.cs" />
+    <Compile Include="Models\SubscriptionCollection.cs" />
     <Compile Include="Models\AlertResultsModel.cs" />
     <Compile Include="Models\GraphUserModel.cs" />
     <Compile Include="Models\Notification.cs" />

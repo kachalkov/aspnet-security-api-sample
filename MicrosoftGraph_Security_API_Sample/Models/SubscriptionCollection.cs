@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace MicrosoftGraph_Security_API_Sample.Models
 {
-    public class SubscriptionResultsModel
+    public class SubscriptionCollection
     {
         public IEnumerable<SubscriptionResultModel> Subscriptions { get; set; }
         public string Query { get; set; }

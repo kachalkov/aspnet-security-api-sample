@@ -22,6 +22,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
     public class HomeController : Controller
     {
         GraphService graphService = new GraphService();
+        private List<string> userScopesList = new List<string>();
 
         private AlertFilter AlertFilters
         {
@@ -55,7 +56,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         }
 
         public async Task<ActionResult> Index()
-        {                     
+        {
             if (!Request.IsAuthenticated)
             {
                 Session["ProviderList"] = new[] { "All" };
@@ -63,18 +64,18 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
             else
             {
 
-                string UserScopes = ConfigurationManager.AppSettings["ida:UserScopes"];
-                if (UserScopes != null)
+                string userScopes = ConfigurationManager.AppSettings["ida:UserScopes"];
+                if (!string.IsNullOrEmpty(userScopes))
                 {
-                    List<string> userScopesList = new List<string>(UserScopes.Split(' '));
+                    userScopesList = new List<string>(userScopes.Split(' '));
                     if (!userScopesList.Contains("SecurityEvents.Read.All") &&
                             !userScopesList.Contains("SecurityEvents.ReadWrite.All"))
                     {
                         return View("AdminConsent");
                     }
                 }
-                 await GetProviderList();
-               
+                await SetProviderList();
+
             }
             return View("Graph");
         }
@@ -92,21 +93,20 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         /// <summary>
         ///  Get the provider list
         /// </summary>
-        /// <param name="alertFilter"></param>
         /// <returns></returns>
-        public async Task GetProviderList()
+        public async Task SetProviderList()
         {
             try
             {
                 AlertFilter alertFilter = new AlertFilter { Top = 1 };
-                
+
                 var Top1Alerts = await graphService.GetAlerts(alertFilter);
-                string[] providers = new string[Top1Alerts.Count+1];
+                string[] providers = new string[Top1Alerts.Count + 1];
                 int index = 0;
                 providers[index++] = "All";
                 if (Top1Alerts != null)
                 {
-                    foreach(Alert alert in Top1Alerts)
+                    foreach (Alert alert in Top1Alerts)
                     {
                         providers[index++] = alert.VendorInformation.Provider;
                     }
@@ -114,11 +114,26 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
 
                 Session["ProviderList"] = providers;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
         }
+
+        /// <summary>
+        ///  Checks the provider list
+        /// </summary>
+
+        /// <returns></returns>
+        public async Task CheckProviderList()
+        {
+            string[] providerList = Session["ProviderList"] as string[];
+            if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
+            {
+                await SetProviderList();
+            }
+        }
+
 
         /// <summary>
         ///  Get the alerts based on filters
@@ -130,12 +145,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         {
             try
             {
-                string[] providerList = Session["ProviderList"] as string[];
-                if (providerList == null || (providerList.Length == 1  && providerList[0] == "All") )
-                {
-                    await GetProviderList();
-                }
-
+                await CheckProviderList();
                 Session["CurrentAlert"] = null;
                 ISecurityAlertsCollectionPage securityAlerts = await graphService.GetAlerts(alertFilter);
 
@@ -148,7 +158,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 queryBuilder.Append($".Top({alertFilter.Top}).GetAsync()'");
                 queryBuilder.Append("<br />");
 
-               if (!string.IsNullOrEmpty(alertFilter.FilteredQuery))
+                if (!string.IsNullOrEmpty(alertFilter.FilteredQuery))
                 {
                     queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts?$filter={HttpUtility.UrlEncode(alertFilter.FilteredQuery)}%26$top={alertFilter.Top}&&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/beta/security/alerts?");
 
@@ -201,21 +211,13 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         {
             try
             {
-                string[] providerList = Session["ProviderList"] as string[];
-                if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
-                {
-                    await GetProviderList();
-                }
+                await CheckProviderList();
                 Session["GetAlertResults"] = null;
-                string UserScopes = ConfigurationManager.AppSettings["ida:UserScopes"];
-                if (UserScopes != null)
+                if (!userScopesList.Contains("SecurityEvents.ReadWrite.All"))
                 {
-                    List<string> userScopesList = new List<string>(UserScopes.Split(' '));
-                    if (!userScopesList.Contains("SecurityEvents.ReadWrite.All"))
-                    {
-                        return View("AdminConsent");
-                    }
+                    return View("AdminConsent");
                 }
+
                 UpdateAlertFilters = updateAlertModel;
                 var queryBuilder = new StringBuilder();
 
@@ -296,7 +298,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 return RedirectToAction("Index", "Error", new { message = Resource.Error_Message + Request.RawUrl + ": " + ex.Message });
             }
         }
-   
+
         /// <summary>
         /// Gets the device details which helps in further investigation of alert
         /// </summary>
@@ -323,11 +325,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         {
             try
             {
-                string[] providerList = Session["ProviderList"] as string[];
-                if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
-                {
-                    await GetProviderList();
-                }
+                await CheckProviderList();
                 var alert = await graphService.GetAlertById(id);
 
                 if (alert == null)
@@ -370,7 +368,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                         PrivateIpAddress = hostState.PrivateIpAddress
                     };
                 }
-   
+
                 CurrentAlert = alertModel;
 
                 return View("Graph");
@@ -395,11 +393,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         [Authorize]
         public async Task<ActionResult> Subscribe(SubscriptionFilters subscriptionFilters)
         {
-            string[] providerList = Session["ProviderList"] as string[];
-            if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
-            {
-                await GetProviderList();
-            }
+            await CheckProviderList();
             Session["CurrentAlert"] = null;
             SubscriptionFilters = subscriptionFilters;
             try
@@ -444,7 +438,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                         Session["SubscriptionResult"] = null;
 
                     }
-                }   
+                }
                 Session["GetAlertResults"] = null;
                 return View("Graph");
             }
@@ -471,11 +465,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         [Authorize]
         public async Task<ActionResult> ListSubscriptions()
         {
-            string[] providerList = Session["ProviderList"] as string[];
-            if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
-            {
-                await GetProviderList();
-            }
+            await CheckProviderList();
             Session["CurrentAlert"] = null;
             Session["GetAlertResults"] = null;
             try
@@ -487,7 +477,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 queryBuilder.Append("<br />");
                 queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=subscriptions&&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/beta/subscriptions</a>'");
 
-                var subscriptionResultsModel = new SubscriptionResultsModel
+                var subscriptionCollection = new SubscriptionCollection
                 {
                     Query = queryBuilder.ToString(),
                     Subscriptions = subscriptions?.Select(sa => new SubscriptionResultModel
@@ -499,7 +489,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                         NotificationUrl = sa.NotificationUrl
                     }) ?? Enumerable.Empty<SubscriptionResultModel>()
                 };
-                Session["GetSubscriptionResults"] = subscriptionResultsModel;
+                Session["GetSubscriptionResults"] = subscriptionCollection;
 
                 return View("Graph");
             }

@@ -246,7 +246,13 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             }
 
             Alert alert = await graphClient.Security.Alerts[alertId].Request().GetAsync();
+            object aipData = null;
+            alert.AdditionalData?.TryGetValue("AIPDataAccessState", out aipData);
             alert.AdditionalData.Clear();
+            if (aipData != null)
+            {
+                alert.AdditionalData.Add("AIPDataAccessState", aipData);
+            }
             return alert;
         }
 

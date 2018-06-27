@@ -10,7 +10,7 @@
     var alertResults = Session["GetAlertResults"] as AlertResultsModel;
     var subscriptionResult = Session["SubscriptionResult"] as SubscriptionResultModel;
     var updateAlertResults = Session["UpdateAlertResults"] as UpdateAlertResultModel;
-    var listExistingSubscriptions = Session["GetSubscriptionResults"] as SubscriptionResultsModel;
+    var listExistingSubscriptions = Session["GetSubscriptionResults"] as SubscriptionCollection;
     var showAlertManagement = updateAlertResults != null;
     var showSubscriptionResults = subscriptionResult != null || listExistingSubscriptions != null;
 

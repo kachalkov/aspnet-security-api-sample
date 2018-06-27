@@ -19,7 +19,6 @@ namespace MicrosoftGraph_Security_API_Sample.Models
 {
     public class GraphService
     {
-        public readonly string GraphBetaBaseUrl = "https://graph.microsoft.com/beta";
         public GraphServiceClient graphClient = null;
 
         /// <summary>
@@ -30,7 +29,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             graphClient = SDKHelper.GetAuthenticatedClient();
             if (graphClient != null)
             {
-                graphClient.BaseUrl = GraphBetaBaseUrl;
+                graphClient.BaseUrl = ConfigurationManager.AppSettings["GraphBaseUrl"];
             }
 
         }
@@ -209,7 +208,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             if (alert == null)
             {
                 throw new ArgumentNullException(nameof(alert));
-            }
+            }          
 
             if (!Enum.TryParse<AlertStatus>(updateAlertModel.UpdateStatus, true, out var status))
             {
@@ -228,12 +227,10 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             if (!string.IsNullOrEmpty(updateAlertModel.Comments))
             {
                 alert.Comments = updateAlertModel.Comments;
-            }
+            }           
 
             alert.AssignedTo = await GetMyEmailAddress();
-
             return await graphClient.Security.Alerts[alert.Id].Request().UpdateAsync(alert);
-
         }
 
         /// <summary>
@@ -248,7 +245,9 @@ namespace MicrosoftGraph_Security_API_Sample.Models
                 return null;
             }
 
-            return await graphClient.Security.Alerts[alertId].Request().GetAsync();
+            Alert alert = await graphClient.Security.Alerts[alertId].Request().GetAsync();
+            alert.AdditionalData.Clear();
+            return alert;
         }
 
         /// <summary>
@@ -380,6 +379,18 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             };
 
             return await graphClient.Subscriptions.Request().AddAsync(subscription);
+        }
+
+        public async Task<IGraphServiceSubscriptionsCollectionPage> ListSubscriptions()
+        {
+            try
+            {
+                return await graphClient.Subscriptions.Request().GetAsync();
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Collections.Generic;
+using System.Configuration;
 
 namespace MicrosoftGraph_Security_API_Sample.Controllers
 {
@@ -54,15 +55,27 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         }
 
         public async Task<ActionResult> Index()
-        {
+        {                     
             if (!Request.IsAuthenticated)
             {
                 Session["ProviderList"] = new[] { "All" };
             }
             else
             {
-                Session["ProviderList"] = await GetProviderList();
-            }               
+
+                string UserScopes = ConfigurationManager.AppSettings["ida:UserScopes"];
+                if (UserScopes != null)
+                {
+                    List<string> userScopesList = new List<string>(UserScopes.Split(' '));
+                    if (!userScopesList.Contains("SecurityEvents.Read.All") &&
+                            !userScopesList.Contains("SecurityEvents.ReadWrite.All"))
+                    {
+                        return View("AdminConsent");
+                    }
+                }
+                 await GetProviderList();
+               
+            }
             return View("Graph");
         }
 
@@ -70,8 +83,10 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         {
             base.Initialize(requestContext);
             Session["AlertFilters"] = Session["AlertFilters"] as AlertFilter ?? new AlertFilter { Top = 1 };
-           
-
+            Session["GetSubscriptionResults"] = null;
+            Session["SubscriptionResult"] = null;
+            Session["SubscriptionFilters"] = new SubscriptionFilters();
+            Session["UpdateAlertResults"] = null;
         }
 
         /// <summary>
@@ -79,7 +94,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         /// </summary>
         /// <param name="alertFilter"></param>
         /// <returns></returns>
-        public async Task<string[]> GetProviderList()
+        public async Task GetProviderList()
         {
             try
             {
@@ -97,15 +112,12 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                     }
                 }
 
-                ViewBag.ProviderList = providers;
-                return providers;
-
+                Session["ProviderList"] = providers;
             }
             catch(Exception ex)
             {
 
             }
-            return null;
         }
 
         /// <summary>
@@ -118,6 +130,12 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         {
             try
             {
+                string[] providerList = Session["ProviderList"] as string[];
+                if (providerList == null || (providerList.Length == 1  && providerList[0] == "All") )
+                {
+                    await GetProviderList();
+                }
+
                 Session["CurrentAlert"] = null;
                 ISecurityAlertsCollectionPage securityAlerts = await graphService.GetAlerts(alertFilter);
 
@@ -183,7 +201,21 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         {
             try
             {
+                string[] providerList = Session["ProviderList"] as string[];
+                if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
+                {
+                    await GetProviderList();
+                }
                 Session["GetAlertResults"] = null;
+                string UserScopes = ConfigurationManager.AppSettings["ida:UserScopes"];
+                if (UserScopes != null)
+                {
+                    List<string> userScopesList = new List<string>(UserScopes.Split(' '));
+                    if (!userScopesList.Contains("SecurityEvents.ReadWrite.All"))
+                    {
+                        return View("AdminConsent");
+                    }
+                }
                 UpdateAlertFilters = updateAlertModel;
                 var queryBuilder = new StringBuilder();
 
@@ -206,7 +238,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 if (string.IsNullOrEmpty(updateAlertModel.AlertId))
                 {
                     updateAlertResultModel.Error = "Please enter valid Alert Id";
-                    ViewBag.UpdateAlertResults = updateAlertResultModel;
+                    Session["UpdateAlertResults"] = updateAlertResultModel;
 
                     return View("Graph");
                 }
@@ -215,7 +247,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                 if (alert == null)
                 {
                     updateAlertResultModel.Error = $"No alert matching this ID {updateAlertModel.AlertId} was found";
-                    ViewBag.UpdateAlertResults = updateAlertResultModel;
+                    Session["UpdateAlertResults"] = updateAlertResultModel;
 
                     return View("Graph");
                 }
@@ -245,8 +277,8 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                     Provider = alertUpdated.VendorInformation.Provider,
                     Severity = alertUpdated.Severity
                 };
-               
-                ViewBag.UpdateAlertResults = updateAlertResultModel;
+
+                Session["UpdateAlertResults"] = updateAlertResultModel;
 
                 return View("Graph");
             }
@@ -291,6 +323,11 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         {
             try
             {
+                string[] providerList = Session["ProviderList"] as string[];
+                if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
+                {
+                    await GetProviderList();
+                }
                 var alert = await graphService.GetAlertById(id);
 
                 if (alert == null)
@@ -305,7 +342,6 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
 
                 queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=security/alerts/{id}&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/beta/security/alerts/{id}/</a>'");
                 queryBuilder.Append("<br />");
-
 
                 var alertModel = new AlertModel
                 {
@@ -334,7 +370,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                         PrivateIpAddress = hostState.PrivateIpAddress
                     };
                 }
-
+   
                 CurrentAlert = alertModel;
 
                 return View("Graph");
@@ -359,6 +395,11 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
         [Authorize]
         public async Task<ActionResult> Subscribe(SubscriptionFilters subscriptionFilters)
         {
+            string[] providerList = Session["ProviderList"] as string[];
+            if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
+            {
+                await GetProviderList();
+            }
             Session["CurrentAlert"] = null;
             SubscriptionFilters = subscriptionFilters;
             try
@@ -369,7 +410,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                     {
                         Error = "Please select at least one property/criterion for subscribing to alert notifications"
                     };
-                    ViewBag.GetSubscriptionResults = subscriptionResultModel;
+                    Session["SubscriptionResult"] = subscriptionResultModel;
                 }
                 else
                 {
@@ -381,11 +422,14 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
 
                     queryBuilder.Append($"REST query: POST '<a>https://graph.microsoft.com/beta/subscriptions</a>'");
                     queryBuilder.Append("<br />");
+                    queryBuilder.Append($"Request Body: ResourceUri = {subscription.Resource}; ExpirationDateTime = {subscription.ExpirationDateTime}; ");
+
 
                     if (subscription != null)
                     {
                         var subscriptionResultModel = new SubscriptionResultModel()
                         {
+                            Query = queryBuilder.ToString(),
                             Id = subscription.Id,
                             Resource = subscription.Resource,
                             NotificationUrl = subscription.NotificationUrl,
@@ -393,11 +437,11 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
                             ChangeType = subscription.ChangeType,
                             ClientState = subscription.ClientState
                         };
-                        ViewBag.GetSubscriptionResults = subscriptionResultModel;
+                        Session["SubscriptionResult"] = subscriptionResultModel;
                     }
                     else
                     {
-                        ViewBag.GetSubscriptionResults = null;
+                        Session["SubscriptionResult"] = null;
 
                     }
                 }   
@@ -419,6 +463,60 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the alert by alertid
+        /// </summary>
+        /// <param name="id">Id of the alert</param>
+        /// <returns></returns>
+        [Authorize]
+        public async Task<ActionResult> ListSubscriptions()
+        {
+            string[] providerList = Session["ProviderList"] as string[];
+            if (providerList == null || (providerList.Length == 1 && providerList[0] == "All"))
+            {
+                await GetProviderList();
+            }
+            Session["CurrentAlert"] = null;
+            Session["GetAlertResults"] = null;
+            try
+            {
+                IGraphServiceSubscriptionsCollectionPage subscriptions = await graphService.ListSubscriptions();
+
+                var queryBuilder = new StringBuilder();
+                queryBuilder.Append("SDK query: 'graphClient.Subscriptions.Request().GetAsync()'");
+                queryBuilder.Append("<br />");
+                queryBuilder.Append($"REST query: '<a href=\"https://developer.microsoft.com/en-us/graph/graph-explorer?request=subscriptions&&method=GET&version=beta&GraphUrl=https://graph.microsoft.com\" target=\"_blank\">https://graph.microsoft.com/beta/subscriptions</a>'");
+
+                var subscriptionResultsModel = new SubscriptionResultsModel
+                {
+                    Query = queryBuilder.ToString(),
+                    Subscriptions = subscriptions?.Select(sa => new SubscriptionResultModel
+                    {
+                        Id = sa.Id,
+                        Resource = sa.Resource,
+                        ExpirationDateTime = sa.ExpirationDateTime,
+                        ClientState = sa.ClientState,
+                        NotificationUrl = sa.NotificationUrl
+                    }) ?? Enumerable.Empty<SubscriptionResultModel>()
+                };
+                Session["GetSubscriptionResults"] = subscriptionResultsModel;
+
+                return View("Graph");
+            }
+            catch (ServiceException se)
+            {
+                if (se.Error.Message == Resource.Error_AuthChallengeNeeded)
+                {
+                    return new EmptyResult();
+                }
+
+                return RedirectToAction("Index", "Error", new { message = Resource.Error_Message + Request.RawUrl + ": " + se.Error.Message });
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index", "Error", new { message = Resource.Error_Message + Request.RawUrl + ": " + ex.Message });
+            }
+        }
 
         public ActionResult About()
         {

@@ -6,13 +6,12 @@
 
 @{
     ViewBag.Title = Resource.App_Name;
-    ViewBag.Top = 1;
     var AlertFilters = Session["AlertFilters"] as AlertFilter;
     var AlertResults = Session["GetAlertResults"] as AlertResultsModel;
     var currentAlert = Session["CurrentAlert"] as AlertModel;
     var SubscriptionFilters = Session["SubscriptionFilters"] as SubscriptionFilters;
     var UpdateAlertFilters = Session["UpdateAlertFilters"] as UpdateAlertModel;
-}
+   }
 
 
 <h1 class="text-center">@ViewBag.Title</h1>
@@ -71,14 +70,19 @@
             }
 
             <hr />
+            @if (Request.IsAuthenticated && currentAlert != null)
+            {
+                @Html.Partial("_UpdateAlertPartialView", new UpdateAlertModel { AlertId = currentAlert?.Id, Comments = currentAlert?.Comments, Feedback = currentAlert?.Feedback, UpdateStatus = currentAlert?.Status })
 
-            @Html.Partial("_UpdateAlertPartialView", new UpdateAlertModel { AlertId = currentAlert?.Id, Comments = currentAlert?.Comments, Feedback = currentAlert?.Feedback, UpdateStatus = currentAlert?.Status})
-
-
+            }
+            else
+            {
+                @Html.Partial("_UpdateAlertPartialView", new UpdateAlertModel())
+            }
             <hr />
 
             @Html.Partial("_SubscriptionPartialView", SubscriptionFilters)
-
+        
         </div>
         <div class="col-md-5">
             @Html.Partial("Alert")

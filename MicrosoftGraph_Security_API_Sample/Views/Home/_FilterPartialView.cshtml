@@ -13,7 +13,6 @@
 
 @using (Html.BeginForm("GetAlerts", "Home"))
 {
-
     <h2>Select alerts to view</h2>
     <div class="container-fluid">
 
@@ -21,7 +20,7 @@
             <div class="col-md-2">
                 <div class="form-group">
                     @Html.LabelFor(m => m.Top, "Top X")
-                    @Html.DropDownListFor(m => m.Top, new SelectList(new[] { "1", "5", "10", "20" }), new { @class = "form-control" })
+                    @Html.DropDownListFor(m => m.Top, new SelectList(new[] { "1", "5", "10", "20", "50" }), new { @class = "form-control" })
                 </div>
             </div>
             @*// The ‘Category’ dropdown menu contains ‘hard-coded’ values for the demo alert categories,

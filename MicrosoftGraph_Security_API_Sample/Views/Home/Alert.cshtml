@@ -8,12 +8,11 @@
 
     var currentAlert = Session["CurrentAlert"] as AlertModel;
     var alertResults = Session["GetAlertResults"] as AlertResultsModel;
-    var subscriptionResults = ViewBag.GetSubscriptionResults as SubscriptionResultModel;
-
-    var updateAlertResults = ViewBag.UpdateAlertResults as UpdateAlertResultModel;
-
+    var subscriptionResult = Session["SubscriptionResult"] as SubscriptionResultModel;
+    var updateAlertResults = Session["UpdateAlertResults"] as UpdateAlertResultModel;
+    var listExistingSubscriptions = Session["GetSubscriptionResults"] as SubscriptionResultsModel;
     var showAlertManagement = updateAlertResults != null;
-    var showSubscriptionResults = subscriptionResults != null;
+    var showSubscriptionResults = subscriptionResult != null || listExistingSubscriptions != null;
 
     var currentTab = "metadata";
     if (alertResults != null || currentAlert != null)
@@ -28,7 +27,7 @@
     {
         currentTab = "user";
     }
-    else if (subscriptionResults != null)
+    else if (showSubscriptionResults == true)
     {
         currentTab = "subscription";
     }
@@ -54,7 +53,7 @@
                 <a href="#update-alert-results" aria-controls="update-alert-results" role="tab" data-toggle="tab">Alert management</a>
             </li>
         }
-        @if (subscriptionResults != null)
+        @if (showSubscriptionResults == true)
         {
             <li role="presentation" class="@(currentTab=="subscription" ? "active" : string.Empty)">
                 <a href="#subscription-results" aria-controls="subscription-results" role="tab" data-toggle="tab">Subscription details</a>
@@ -67,7 +66,7 @@
             {
                 <span>No alert selected</span>
             }
-            else if (alertResults != null && currentAlert != null && !string.IsNullOrEmpty(currentAlert.Metadata))
+            else if (currentAlert != null && !string.IsNullOrEmpty(currentAlert.Metadata))
             {
                 @Html.Raw(currentAlert.Query)
                 <pre>@currentAlert.Metadata</pre>
@@ -99,7 +98,7 @@
                         <div class="col-md-2 profile-picture">
                             @if (user.Picture != null)
                             {
-                               <img src="@user.Picture" width="100" height="100"/>
+                                <img src="@user.Picture" width="100" height="100" />
                             }
                             else
                             {
@@ -127,7 +126,7 @@
                         <span>Email: </span>
                         <span class="profile-value">
                             @if (!string.IsNullOrEmpty(@user.Email))
-                                {
+                            {
                                 <a href="mailto: @user.Email">@user.Email</a>
                             }
                             else
@@ -144,7 +143,7 @@
                             </a>
                             <ul class="devices-container collapse in" id="registeredDevices" aria-expanded="true">
                                 @foreach (var device in user.RegisteredDevices)
-                            {
+                                {
                                     <li>
                                         <span class="user-device @(device.Id == user?.SelectedDevice?.Id ? "selected" : string.Empty)">@Html.ActionLink(device.DisplayName, "GetDevice", new { id = device.Id })</span>
                                     </li>
@@ -161,7 +160,7 @@
                             </a>
                             <ul class="devices-container collapse in" id="ownedDevices" aria-expanded="true">
                                 @foreach (var device in user.OwnedDevices)
-                            {
+                                {
                                     <li>
                                         <span class="user-device @(device.Id == user?.SelectedDevice?.Id ? "selected" : string.Empty)">@Html.ActionLink(device.DisplayName, "GetDevice", new { id = device.Id })</span>
                                     </li>
@@ -179,7 +178,7 @@
                         <hr />
 
                         @if (!string.IsNullOrEmpty(selectedDevice.DisplayName))
-                            {
+                        {
                             <div class="row">
                                 <div class="col-md-2"><img src="~/Content/laptop_icon.png" class="center-block" style="margin: 8px" /></div>
                                 <div class="col-md-10"><h3>@selectedDevice.DisplayName</h3></div>
@@ -211,7 +210,7 @@
                         <hr />
 
                         @if (!string.IsNullOrEmpty(currentAlert.Device.Fqdn))
-                            {
+                        {
                             <div class="row">
                                 <div class="col-md-2"><img src="~/Content/laptop_icon.png" class="center-block" style="margin: 8px" /></div>
                                 <div class="col-md-10"><h3>@currentAlert.Device.Fqdn</h3></div>
@@ -235,7 +234,7 @@
         </div>
 
         @if (showAlertManagement)
-                            {
+        {
             <div role="tabpanel" class="tab-pane fade @(currentTab=="management" ? "active in" : string.Empty)" id="update-alert-results">
                 <div class="container-fluid">
                     <div class="row">
@@ -308,41 +307,79 @@
             </div>
         }
         @if (showSubscriptionResults)
-                            {
+        {
             <div role="tabpanel" class="tab-pane fade @(currentTab=="subscription" ? "active in" : string.Empty)" id="subscription-results">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12">
-                            @if (subscriptionResults != null)
+                            @if (subscriptionResult != null)
                             {
-                                if (!string.IsNullOrEmpty(subscriptionResults.Error))
+                                if (!string.IsNullOrEmpty(subscriptionResult.Error))
                                 {
-                                    @subscriptionResults.Error
+                                    @subscriptionResult.Error
                                 }
                                 else
                                 {
-                                <span>Subscription created: </span>
+                                    <span>Subscription created: </span>
+                                    <br>
 
-                                <table class="table table-striped subscription-details" cellpadding="10">
-                                    <thead>
-                                        <tr><th>Property</th><th>Details</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr><td>Id</td><td>@subscriptionResults.Id</td></tr>
-                                        <tr><td>Client State</td><td>@subscriptionResults.ClientState</td></tr>
-                                        <tr><td>Change Type</td><td>@subscriptionResults.ChangeType</td></tr>
-                                        <tr><td>Resource</td><td>@subscriptionResults.Resource</td></tr>
-                                        <tr><td>Notification URL</td><td>@subscriptionResults.NotificationUrl</td></tr>
-                                        <tr><td>Expiration Datetime</td><td>@subscriptionResults.ExpirationDateTime</td></tr>
-                                    </tbody>
-                                </table>
+                                    @Html.Raw(subscriptionResult.Query)
+                                    <br>
+
+                                    <table class="table table-striped subscription-details" border="1" cellpadding="10">
+                                        <thead>
+                                            <tr><th>Property</th><th>Details</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>Id</td><td>@subscriptionResult.Id</td></tr>
+                                            <tr><td>Client State</td><td>@subscriptionResult.ClientState</td></tr>
+                                            <tr><td>Change Type</td><td>@subscriptionResult.ChangeType</td></tr>
+                                            <tr><td>Resource</td><td>@subscriptionResult.Resource</td></tr>
+                                            <tr><td>Notification URL</td><td>@subscriptionResult.NotificationUrl</td></tr>
+                                            <tr><td>Expiration Datetime</td><td>@subscriptionResult.ExpirationDateTime</td></tr>
+                                        </tbody>
+                                    </table>
+                                }
+                            }
+
+                            @if (listExistingSubscriptions != null && Request.IsAuthenticated)
+                            {
+                                @Html.Raw(listExistingSubscriptions.Query)
+
+                                <div>
+                                    @if (listExistingSubscriptions.Subscriptions?.Any() ?? false)
+                                    {
+                                        <br />
+                                                    <h3>Subscriptions that currently exist are: </h3>
+                                                    <br />
+                                                    <table class="table table-striped" border="1" cellpadding="50">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Subscription ID</th>
+                                                                <th>Resource URL</th>
+                                                                <th>Expiration DateTime</th>
+                                                            </tr>
+
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var subscription in listExistingSubscriptions.Subscriptions)
+                                                            {
+                                                                <tr>
+                                                                    <td>@subscription.Id</td>
+                                                                    <td>@subscription.Resource</td>
+                                                                    <td>@subscription.ExpirationDateTime</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
                                     }
-
-                                }
-                                else
-                                {
-                                <span>No subscription created</span>
-                                }
+                                    else
+                                    {
+                                        <br />
+                                                <b>@("No subscriptions exist")</b>
+                                    }
+                                </div>
+                            }
 
                         </div>
                     </div>

@@ -4,6 +4,7 @@
 */
 
 using System.Web;
+using System.Web.Mvc;
 using Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
@@ -15,6 +16,7 @@ using System.IdentityModel.Tokens;
 using System.IdentityModel.Claims;
 using Microsoft.Identity.Client;
 using MicrosoftGraph_Security_API_Sample.Controllers;
+using System.Collections.Generic;
 
 namespace MicrosoftGraph_Security_API_Sample
 {
@@ -50,16 +52,7 @@ namespace MicrosoftGraph_Security_API_Sample
                     Scope = "openid email profile offline_access " + graphScopes,
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = false,
-                        // In a real application you would use IssuerValidator for additional checks, 
-                        // like making sure the user's organization has signed up for your app.
-                        //     IssuerValidator = (issuer, token, tvp) =>
-                        //     {
-                        //         if (MyCustomTenantValidation(issuer)) 
-                        //             return issuer;
-                        //         else
-                        //             throw new SecurityTokenInvalidIssuerException("Invalid issuer");
-                        //     },
+                        ValidateIssuer = false
                     },
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
@@ -79,6 +72,7 @@ namespace MicrosoftGraph_Security_API_Sample
                             string[] scopes = graphScopes.Split(new char[] { ' ' });
 
                             AuthenticationResult result = await cca.AcquireTokenByAuthorizationCodeAsync(code, scopes);
+                            ConfigurationManager.AppSettings["ida:UserScopes"] = string.Join(" ", result.Scopes);            
                         },
              
                     }

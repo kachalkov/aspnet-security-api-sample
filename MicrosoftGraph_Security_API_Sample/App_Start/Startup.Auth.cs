@@ -32,7 +32,8 @@ namespace MicrosoftGraph_Security_API_Sample
         private static string appSecret = ConfigurationManager.AppSettings["ida:AppSecret"];
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
         private static string graphScopes = ConfigurationManager.AppSettings["ida:GraphScopes"];
-        public static List<string> UserScopesList = null;
+
+        public static string UserScopes = string.Empty;
 
         public async void ConfigureAuth(IAppBuilder app)
         {
@@ -73,7 +74,7 @@ namespace MicrosoftGraph_Security_API_Sample
                             string[] scopes = graphScopes.Split(new char[] { ' ' });
 
                             AuthenticationResult result = await cca.AcquireTokenByAuthorizationCodeAsync(code, scopes); 
-                            UserScopesList = new List<string>(result.Scopes);
+                            UserScopes = string.Join(" ", result.Scopes);
                         },
              
                     }

@@ -63,11 +63,15 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
             }
             else
             {
-                userScopesList = Startup.UserScopesList;
-                if (userScopesList != null && !userScopesList.Contains("SecurityEvents.Read.All") &&
-                   !userScopesList.Contains("SecurityEvents.ReadWrite.All"))
+                string userScopes = Startup.UserScopes as string;
+                if (!string.IsNullOrEmpty(userScopes))
                 {
-                    return View("AdminConsent");
+                    userScopesList = new List<string>(userScopes.Split(' '));
+                    if (!userScopesList.Contains("SecurityEvents.Read.All") &&
+                            !userScopesList.Contains("SecurityEvents.ReadWrite.All"))
+                    {
+                        return View("AdminConsent");
+                    }
                 }
                 await SetProviderList();
 
@@ -208,7 +212,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
             {
                 await CheckProviderList();
                 Session["GetAlertResults"] = null;
-                if (userScopesList != null && !userScopesList.Contains("SecurityEvents.ReadWrite.All"))
+                if (!userScopesList.Contains("SecurityEvents.ReadWrite.All"))
                 {
                     return View("AdminConsent");
                 }

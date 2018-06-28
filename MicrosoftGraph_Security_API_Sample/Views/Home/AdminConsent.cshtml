@@ -6,7 +6,7 @@
 @using MicrosoftGraph_Security_API_Sample.Models
 
 @{
-    var UserScopes = ConfigurationManager.AppSettings["ida:UserScopes"];
+    var UserScopes = Startup.UserScopes;
     var AppId = ConfigurationManager.AppSettings["ida:AppId"];
     var RedirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
     ViewBag.Title = Resource.App_Name;
@@ -24,9 +24,9 @@
         <h4>Your Tenant admin has not given consent to this application. </h4>
         <p>
             This application requires <code>'SecurityEvents.Read.All' and 'SecurityEvents.ReadWrite.All'</code>
-            permissions to access the Secuirty API, You currently have <code>'@UserScopes'</code>
+            permissions to access the Security API, Your application currently have <code>'@UserScopes'</code>
             permissions.
-</p>
+        </p>
         <hr>
         <p>
             <b>If you are the tenant admin</b>, please give this application consent to access

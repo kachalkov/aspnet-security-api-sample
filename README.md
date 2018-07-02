@@ -37,9 +37,10 @@ This sample requires the following:
  2. The sample consists of two parts as shown in the picture below.
 
   Part 1 : **Get alerts and Manage alert**
+
   Part 2 :  **Subscribe and listen to the notifications**
 
-![Scope consent dialog](readme-images/Webapp.PNG)
+![Home page](readme-images/Webapp.PNG)
 
 ## Register the application
 
@@ -75,14 +76,14 @@ Note: you will not be able to view the secret again in this interface.
 1. Provide your Administrator the **Application Id** and the **Redirect URI** that you used in the previous steps. The organization’s Azure Active Directory Tenant Administrator is required to grant the required consent (permissions) to the application.
 2.	As the Tenant Administrator for your organization, open a browser window and paste the following URL in the address bar (after adding values for APPLICATION_ID and REDIRECT_URL):
 https://login.microsoftonline.com/common/adminconsent?client_id=APPLICATION_ID&state=12345&redirect_uri=REDIRECT_URL.
-3.	After authenticating, the Tenant Administrator will be presented with a dialog like the following (depending on the permissions the application is requesting):
+3.	After authenticating, the Tenant Administrator will be presented with a dialog like the following (depending on the permissions the application is requesting)
 
- 	![Scope consent dialog](readme-images/Scope.PNG)
+     >![Scope consent dialog](readme-images/Scope.PNG)
 
-3. By clicking on "Accept" in this dialog, the Tenat Administrator is granting consent to all users of this organization to use this application. 
+4. By clicking on "Accept" in this dialog, the Tenant Administrator is granting consent to all users of this organization to use this application. 
 Note: Because there is no application currently running at the redirect URL you will be receive an error message. This behavior is expected. The Tenant Administrator consent will have been granted by the time this error page is shown.
 
-  ![Scope consent dialog](readme-images/GrantError.png)
+     >![Scope consent dialog](readme-images/GrantError.png)
 
 ### Authorize users in your organization to access the Microsoft Graph security API (Assign required Azure role)
 
@@ -101,7 +102,7 @@ This section describes how the Tenant Administrator can authorize specific users
 
 6. Select the **Limited Administrator** radio button and select the check box next to **Security administrator** role
 
-     ![Role consent dialog](readme-images/SecurityRole.png)
+     >  ![Role consent dialog](readme-images/SecurityRole.png)
 
 7. Click the **Save** button at the top of the page
 
@@ -118,15 +119,22 @@ Replace the **ida:RedirectUri** placeholder value with the redirect url that you
 
 3. Sign in with your work or school account and grant the requested permissions.
 
-4. Select alerts to view by defining filtering criteria and click on the **Get alerts** button. When the operation completes, the alerts matching your filtering criteria will be displayed on the page. The SDK query and REST query used to make the call are also displayed. 
+4. If your application doesn't have proper scopes or if you haven't followed the previous steps properly, you will see the following page.
+
+     >![Admin consent dialog](readme-images/AdminConsent.PNG)
+
+   >Follow the links for more information and try again. Once your application has proper scope and admin consent, the home page will be displayed.
+
+5. Select alerts to view by defining filtering criteria and click on the **Get alerts** button. When the operation completes, the alerts matching your filtering criteria will be displayed on the page. The SDK query and REST query used to make the call are also displayed. 
 Clicking on the REST query link will open a new tab with the **Graph Explorer** pre-populated with your query.
     >Note: The application is retrieving security alerts from your tenant that match the filter criteria. If there are no matching security alerts from the listed providers, "No matching alerts" will be displayed in the response section. To generate sample alerts from Azure Security Center please see [Security Center Alert Validation](https://docs.microsoft.com/en-us/azure/security-center/security-center-alert-validation) 
 
-5. In the list of matching alerts, click on the **Title** of a specific alert you want to view. The complete alert details (JSON) will be displayed in the **Alert Details** tab on the right side of the webpage. If the alert contains the **user principal name** or **fully qualified domain name** properties, the application will make an additional call to Azure Actove Directory via the Microsoft Graph API to retrieve additional details about the user account and the device. Click on **User & device details** tab to view additional user and device data, if it exists. 
+6. In the list of matching alerts, click on the **Title** of a specific alert you want to view. The complete alert details (JSON) will be displayed in the **Alert Details** tab on the right side of the webpage. If the alert contains the **user principal name** or **fully qualified domain name** properties, the application will make an additional call to Azure Actove Directory via the Microsoft Graph API to retrieve additional details about the user account and the device. Click on **User & device details** tab to view additional user and device data, if it exists. 
 
-6. To update an alert, enter the Alert ID, choose/enter values for the editable properties, and click on the **Update Alert** button. The **Original alert details** and **Updated alert details** are displayed on the **Alert management** tab on the right side of the webpage.
+7. To update an alert, enter the Alert ID, choose/enter values for the editable properties, and click on the **Update Alert** button. The **Original alert details** and **Updated alert details** are displayed on the **Alert management** tab on the right side of the webpage.
+   > Note: In order to update an alert, your application needs to have **Security.ReadWrite.All** permission.
 
-7. To use **Subscribe and listen to alert notifications** section, follow the following steps to configure the sample **Notification Listener**.
+8. To use **Subscribe and listen to alert notifications** section, follow the following steps to configure the sample **Notification Listener**.
 
 ## Configure the sample Notification Listener (Part 2).
 
@@ -139,7 +147,7 @@ You can use the ngrok web interface (http://127.0.0.1:4040) to inspect the HTTP 
 
 1. Copy the **URL** port number from the **Properties** window. If the **Properties** window isn't dsplayed, choose **View > Properties Window**. 
 
-	![The URL port number in the Properties window](readme-images/ngrok.JPG)
+	 >![The URL port number in the Properties window](readme-images/ngrok.JPG)
 
 2. [Download ngrok](https://ngrok.com/download) for Windows.  
 
@@ -149,11 +157,11 @@ You can use the ngrok web interface (http://127.0.0.1:4040) to inspect the HTTP 
 
    `ngrok http {port-number} -host-header=localhost:{port-number}`
 
-	![Example command to run in the ngrok console](readme-images/ngrok1.PNG)
+	  >![Example command to run in the ngrok console](readme-images/ngrok1.PNG)
 
 5. Copy the HTTPS URL displayed in the console. You'll use this to configure your notification URL in the sample.
 
-	![The forwarding HTTPS URL in the ngrok console](readme-images/ngrok2.PNG)
+	  >![The forwarding HTTPS URL in the ngrok console](readme-images/ngrok2.PNG)
 
    >Keep the console open while testing. If you close it, the tunnel will also be closed, and you'll need to generate a new URL and update the sample.
 
@@ -173,15 +181,19 @@ See [Hosting without a tunnel](https://github.com/microsoftgraph/nodejs-webhooks
    
 3. Press F5 to build and run the sample.
 
-4. In the **Subscribe and listen to alert notifications** section, select the alert filters to be notified about and click on the **Subscribe** button. If the subscription is created successfully, you will see the details of the Subscription object under the **Subscription details** tab on the right side of the webpage.
+4. In the **Subscribe and listen to alert notifications** section, click the button **Subscriptions** in order to see the active subscriptions for this application. If there aren't any active subscriptions, the **Subscription details** tab on the right hand side of the web page displays a message saying **No  active subscriptions**. Else it displays the list of all the active subscriptions with details including Subscription ID, Resource URL and Expiration date time for that application.  
 
-5. Click on the **Notify** button that will open a new tab. This page will display notifications as they are received.
+   >![Active subscriptions](readme-images/ActiveSubscriptions.PNG)
 
-6. Go to the original webpage and update an alert matching on the subscription filtering criteria you defined. When the alert is updated, the notification page will recieve and display the notification details, looking like this: 
+5. In order to create a new subscription, select the alert filters to be notified about and click on the **Subscribe** button. If the subscription is created successfully, you will see the details of the Subscription object under the **Subscription details** tab on the right side of the webpage.
 
-    ![Notification Listener page](readme-images/NotificationPage.JPG)
+6. Click on the **Notify** button that will open a new tab. This page will display notifications as they are received.
 
-7. Next steps: Check out the [Microsoft Graph Snippets Sample for ASP.NET 4.6](https://github.com/microsoftgraph/aspnet-snippets-sample) to see additional examples of common Microsoft Graph operations.
+7. Go to the original webpage and update an alert matching on the subscription filtering criteria you defined. When the alert is updated, the notification page will recieve and display the notification details, looking like this: 
+
+    >![Notification Listener page](readme-images/NotificationPage.JPG)
+
+8. Next steps: Check out the [Microsoft Graph Snippets Sample for ASP.NET 4.6](https://github.com/microsoftgraph/aspnet-snippets-sample) to see additional examples of common Microsoft Graph operations.
 
 ## Deploy the sample to Azure
 
@@ -253,6 +265,7 @@ Contains methods (called by HomeController) that build and send REST calls to th
    - The **GetUserDetails** action gets the user's details filtered by the user principal name in the alert details.
    - The **GetDeviceById** action gets the device details filtered by the fully qualified domain name (fqdn) in the alert details.
    - The **Subscribe** action creates a subscription according to the subscription filters.
+  - The **ListSubscriptions** action gets all the active subscriptions for the application.
 
 - [Graph.cshtml](MicrosoftGraph_Security_API_Sample/Views/Home/Graph.cshtml). 
 Contains the sample's UI. 

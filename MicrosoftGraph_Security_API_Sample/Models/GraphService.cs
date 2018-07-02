@@ -387,6 +387,11 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             return await graphClient.Subscriptions.Request().AddAsync(subscription);
         }
 
+        /// <summary>
+        /// List exisiting active subscriptions for this application
+        /// </summary>
+        /// <param name="filters"></param>
+        /// <returns>The subscription collection page</returns>
         public async Task<IGraphServiceSubscriptionsCollectionPage> ListSubscriptions()
         {
             try

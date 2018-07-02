@@ -22,7 +22,7 @@ namespace MicrosoftGraph_Security_API_Sample.Controllers
     public class HomeController : Controller
     {
         GraphService graphService = new GraphService();
-        private List<string> userScopesList = new List<string>();
+        private static List<string> userScopesList = new List<string>();
 
         private AlertFilter AlertFilters
         {

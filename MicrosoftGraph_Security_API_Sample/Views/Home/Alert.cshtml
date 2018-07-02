@@ -10,9 +10,9 @@
     var alertResults = Session["GetAlertResults"] as AlertResultsModel;
     var subscriptionResult = Session["SubscriptionResult"] as SubscriptionResultModel;
     var updateAlertResults = Session["UpdateAlertResults"] as UpdateAlertResultModel;
-    var listExistingSubscriptions = Session["GetSubscriptionResults"] as SubscriptionCollection;
+    var listActiveSubscriptions = Session["GetSubscriptionResults"] as SubscriptionCollection;
     var showAlertManagement = updateAlertResults != null;
-    var showSubscriptionResults = subscriptionResult != null || listExistingSubscriptions != null;
+    var showSubscriptionResults = subscriptionResult != null || listActiveSubscriptions != null;
 
     var currentTab = "metadata";
     if (alertResults != null || currentAlert != null)
@@ -342,15 +342,15 @@
                                 }
                             }
 
-                            @if (listExistingSubscriptions != null && Request.IsAuthenticated)
+                            @if (listActiveSubscriptions != null && Request.IsAuthenticated)
                             {
-                                @Html.Raw(listExistingSubscriptions.Query)
+                                @Html.Raw(listActiveSubscriptions.Query)
 
                                 <div>
-                                    @if (listExistingSubscriptions.Subscriptions?.Any() ?? false)
+                                    @if (listActiveSubscriptions.Subscriptions?.Any() ?? false)
                                     {
                                         <br />
-                                                    <h3>Subscriptions that currently exist are: </h3>
+                                                    <h3>Subscriptions that are currently active: </h3>
                                                     <br />
                                                     <table class="table table-striped" border="1" cellpadding="50">
                                                         <thead>
@@ -362,7 +362,7 @@
 
                                                         </thead>
                                                         <tbody>
-                                                            @foreach (var subscription in listExistingSubscriptions.Subscriptions)
+                                                            @foreach (var subscription in listActiveSubscriptions.Subscriptions)
                                                             {
                                                                 <tr>
                                                                     <td>@subscription.Id</td>
@@ -376,7 +376,7 @@
                                     else
                                     {
                                         <br />
-                                                <b>@("No subscriptions exist")</b>
+                                                <b>@("No active subscriptions")</b>
                                     }
                                 </div>
                             }

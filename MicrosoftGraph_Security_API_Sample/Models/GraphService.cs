@@ -40,7 +40,9 @@ namespace MicrosoftGraph_Security_API_Sample.Models
         /// <returns>Email address of the signed in user</returns>
         public async Task<string> GetMyEmailAddress()
         {
+            graphClient.BaseUrl = "https://graph.microsoft.com/beta";
             User me = await graphClient.Me.Request().Select("mail,userPrincipalName").GetAsync();
+            graphClient.BaseUrl = ConfigurationManager.AppSettings["GraphBaseUrl"];
             return me.Mail ?? me.UserPrincipalName;
         }
 
@@ -55,6 +57,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
         public async Task<GraphUserModel> GetUserDetails(string principalName, bool populatePicture = false, bool populateManager = false, bool populateDevices = false)
         {
             GraphUserModel userModel = null;
+            graphClient.BaseUrl = "https://graph.microsoft.com/beta";
             try
             {
                 //var user = await graphClient.Users[principalName].Request().GetAsync();
@@ -138,6 +141,7 @@ namespace MicrosoftGraph_Security_API_Sample.Models
             }
             catch { }
 
+            graphClient.BaseUrl = ConfigurationManager.AppSettings["GraphBaseUrl"];
             return userModel;
         }
 

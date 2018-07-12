@@ -145,7 +145,7 @@ You must expose a public HTTPS endpoint to create a subscription and receive not
 
 You can use the ngrok web interface (http://127.0.0.1:4040) to inspect the HTTP traffic that passes through the tunnel. To learn more about using ngrok, see the [ngrok website](https://ngrok.com/).  
 
-1. Copy the **URL** port number from the **Properties** window. If the **Properties** window isn't dsplayed, choose **View > Properties Window**. 
+1. Copy the **URL** port number from the **Properties** window. If the **Properties** window isn't displayed, choose **View > Properties Window**. 
 
 	 >![The URL port number in the Properties window](readme-images/ngrok.JPG)
 
@@ -178,22 +178,20 @@ See [Hosting without a tunnel](https://github.com/microsoftgraph/nodejs-webhooks
    >If you get errors while installing packages, make sure the local path where you placed the solution is not too long/deep. Moving the solution closer to the root drive will resolve this issue.
    
    >If you update any dependencies for this sample, make sure you **do not update** System.IdentityModel.Tokens.Jwt to v5, which is designed for use with .NET Core.
-   
-3. Press F5 to build and run the sample.
 
-4. In the **Subscribe and listen to alert notifications** section, click the button **Subscriptions** in order to see the active subscriptions for this application. If there aren't any active subscriptions, the **Subscription details** tab on the right hand side of the web page displays a message saying **No  active subscriptions**. Else it displays the list of all the active subscriptions with details including Subscription ID, Resource URL and Expiration date time for that application.  
+3. In the **Subscribe and listen to alert notifications** section, click the button **Subscriptions** in order to see the active subscriptions for this application. If there aren't any active subscriptions, the **Subscription details** tab on the right hand side of the web page displays a message saying **No  active subscriptions**. Else it displays the list of all the active subscriptions with details including Subscription ID, Resource URL and Expiration date time for that application.  
 
    >![Active subscriptions](readme-images/ActiveSubscriptions.PNG)
 
-5. In order to create a new subscription, select the alert filters to be notified about and click on the **Subscribe** button. If the subscription is created successfully, you will see the details of the Subscription object under the **Subscription details** tab on the right side of the webpage.
+4. In order to create a new subscription, select the alert filters to be notified about and click on the **Subscribe** button. If the subscription is created successfully, you will see the details of the Subscription object under the **Subscription details** tab on the right side of the webpage.
 
-6. Click on the **Notify** button that will open a new tab. This page will display notifications as they are received.
+5. Click on the **Notify** button that will open a new tab. This page will display notifications as they are received.
 
-7. Go to the original webpage and update an alert matching on the subscription filtering criteria you defined. When the alert is updated, the notification page will recieve and display the notification details, looking like this: 
+6. Go to the original webpage and update an alert matching on the subscription filtering criteria you defined. When the alert is updated, the notification page will receive and display the notification details, looking like this: 
 
     >![Notification Listener page](readme-images/NotificationPage.JPG)
 
-8. Next steps: Check out the [Microsoft Graph Snippets Sample for ASP.NET 4.6](https://github.com/microsoftgraph/aspnet-snippets-sample) to see additional examples of common Microsoft Graph operations.
+7. Next steps: Check out the [Microsoft Graph Snippets Sample for ASP.NET 4.6](https://github.com/microsoftgraph/aspnet-snippets-sample) to see additional examples of common Microsoft Graph operations.
 
 ## Deploy the sample to Azure
 
